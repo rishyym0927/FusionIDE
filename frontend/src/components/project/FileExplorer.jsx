@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 const FileExplorer = ({ fileTree, selectedFile, handleFileSelect, handleCreateFile, handleDeleteFile, isDarkMode }) => {
     const [isCreating, setIsCreating] = useState(false)
     const [newFileName, setNewFileName] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
 
     const getFileIcon = (fileName) => {
         const ext = fileName.split('.').pop()
@@ -16,19 +17,33 @@ const FileExplorer = ({ fileTree, selectedFile, handleFileSelect, handleCreateFi
         }
     }
 
-    const handleCreateFileSubmit = (e) => {
+    const handleCreateFileSubmit = async (e) => {
         e.preventDefault()
         if (newFileName.trim()) {
-            handleCreateFile(newFileName.trim())
-            setNewFileName('')
-            setIsCreating(false)
+            setIsLoading(true)
+            try {
+                await handleCreateFile(newFileName.trim())
+                setNewFileName('')
+                setIsCreating(false)
+            } catch (error) {
+                console.error('Error creating file:', error)
+            } finally {
+                setIsLoading(false)
+            }
         }
     }
 
-    const handleDeleteFileClick = (e, fileName) => {
+    const handleDeleteFileClick = async (e, fileName) => {
         e.stopPropagation()
         if (window.confirm(`Are you sure you want to delete ${fileName}?`)) {
-            handleDeleteFile(fileName)
+            setIsLoading(true)
+            try {
+                await handleDeleteFile(fileName)
+            } catch (error) {
+                console.error('Error deleting file:', error)
+            } finally {
+                setIsLoading(false)
+            }
         }
     }
 
@@ -77,14 +92,23 @@ const FileExplorer = ({ fileTree, selectedFile, handleFileSelect, handleCreateFi
                                 isDarkMode 
                                     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                                     : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                            } focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                            } focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
                             autoFocus
+                            disabled={isLoading}
                             onBlur={() => {
-                                if (!newFileName.trim()) {
+                                if (!newFileName.trim() && !isLoading) {
                                     setIsCreating(false)
                                 }
                             }}
                         />
+                        {isLoading && (
+                            <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                                <i className="ri-loader-4-line animate-spin"></i>
+                                Creating file...
+                            </div>
+                        )}
                     </form>
                 )}
 
@@ -138,6 +162,12 @@ const FileExplorer = ({ fileTree, selectedFile, handleFileSelect, handleCreateFi
                 }`}>
                     <i className="ri-file-list-line"></i>
                     <span>{Object.keys(fileTree).length} files</span>
+                    {isLoading && (
+                        <div className="flex items-center gap-1 ml-2">
+                            <i className="ri-loader-4-line animate-spin text-xs"></i>
+                            <span>Saving...</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

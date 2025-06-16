@@ -46,21 +46,55 @@ const Project = () => {
 
     // Set initial file tree
     useEffect(() => {
-        if (project?.fileTree && Object.keys(project.fileTree).length > 0) {
-            setFileTree(project.fileTree)
-            // Set selectedFile to first available file if app.js doesn't exist
-            const files = Object.keys(project.fileTree);
-            if (files.length > 0 && !project.fileTree['README.md']) {
-                setSelectedFile(files[0]);
-            } else {
-                setSelectedFile('README.md');
+        const loadProjectFileTree = async () => {
+            if (project?._id) {
+                try {
+                    // Fetch the latest file tree from backend
+                    const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/${project._id}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const projectData = await response.json();
+                        if (projectData.fileTree && Object.keys(projectData.fileTree).length > 0) {
+                            setFileTree(projectData.fileTree);
+                            // Set selectedFile to first available file
+                            const files = Object.keys(projectData.fileTree);
+                            if (files.length > 0) {
+                                if (projectData.fileTree['README.md']) {
+                                    setSelectedFile('README.md');
+                                } else {
+                                    setSelectedFile(files[0]);
+                                }
+                            }
+                            return; // Exit early if we loaded from backend
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading project file tree:', error);
+                }
             }
-        } else {
-            // Default README.md file with comprehensive instructions
-            setFileTree({
-                "README.md": {
-                    "file": {
-                        "contents": `# Welcome to Your Collaborative Development Environment
+
+            // Fallback to project state or default README
+            if (project?.fileTree && Object.keys(project.fileTree).length > 0) {
+                setFileTree(project.fileTree);
+                const files = Object.keys(project.fileTree);
+                if (files.length > 0) {
+                    if (project.fileTree['README.md']) {
+                        setSelectedFile('README.md');
+                    } else {
+                        setSelectedFile(files[0]);
+                    }
+                }
+            } else {
+                // Default README.md file with comprehensive instructions
+                const defaultFileTree = {
+                    "README.md": {
+                        "file": {
+                            "contents": `# Welcome to Your Collaborative Development Environment
 
 ## 🚀 Getting Started
 
@@ -250,14 +284,30 @@ Happy coding! 🚀
 ---
 
 *This collaborative development environment is designed to make coding together seamless and enjoyable. Explore all the features and make the most of your development experience!*`
+                        }
                     }
+                };
+                
+                setFileTree(defaultFileTree);
+                setSelectedFile('README.md');
+                
+                // Save the default file tree to backend if project exists
+                if (project?._id) {
+                    autoSaveFileTree(defaultFileTree);
                 }
-            })
-        }
+            }
+        };
+
+        loadProjectFileTree();
     }, [project])
 
-    // Auto-save functionality
+    // Auto-save functionality with better error handling
     const autoSaveFileTree = async (newFileTree) => {
+        if (!project?._id) {
+            console.log('No project ID available for auto-save');
+            return;
+        }
+
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/update-filetree`, {
                 method: 'PUT',
@@ -273,6 +323,9 @@ Happy coding! 🚀
 
             if (response.ok) {
                 console.log('FileTree auto-saved successfully');
+            } else {
+                const errorData = await response.json();
+                console.error('Failed to auto-save fileTree:', errorData);
             }
         } catch (error) {
             console.error('Error auto-saving fileTree:', error);
@@ -340,6 +393,8 @@ Happy coding! 🚀
             };
             setFileTree(newFileTree);
             setSelectedFile(fileName);
+            
+            // Auto-save immediately after creating file
             autoSaveFileTree(newFileTree);
         }
     }
@@ -356,6 +411,7 @@ Happy coding! 🚀
                 setSelectedFile(remainingFiles.length > 0 ? remainingFiles[0] : null)
             }
             
+            // Auto-save immediately after deleting file
             autoSaveFileTree(newFileTree);
         }
     }
