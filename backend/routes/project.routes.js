@@ -37,5 +37,12 @@ router.put('/update-file-tree',
     projectController.updateFileTree
 )
 
+router.put('/update-filetree',
+    authMiddleWare.authUser,
+    body('projectId').isString().withMessage('Project ID is required'),
+    body('fileTree').isObject().withMessage('File tree is required'),
+    projectController.updateFileTree
+)
+
 
 export default router;

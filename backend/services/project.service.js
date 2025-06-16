@@ -136,3 +136,117 @@ export const updateFileTree = async ({ projectId, fileTree }) => {
 
     return project;
 }
+
+export const updateFileContent = async ({ projectId, fileName, content }) => {
+    if (!projectId) {
+        throw new Error("projectId is required")
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        throw new Error("Invalid projectId")
+    }
+
+    if (!fileName) {
+        throw new Error("fileName is required")
+    }
+
+    if (content === undefined) {
+        throw new Error("content is required")
+    }
+
+    const project = await projectModel.findOneAndUpdate({
+        _id: projectId
+    }, {
+        $set: {
+            [`fileTree.${fileName}.file.contents`]: content
+        }
+    }, {
+        new: true
+    })
+
+    return project;
+}
+
+export const createFolder = async ({ projectId, folderPath }) => {
+    if (!projectId) {
+        throw new Error("projectId is required")
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        throw new Error("Invalid projectId")
+    }
+
+    if (!folderPath) {
+        throw new Error("folderPath is required")
+    }
+
+    const project = await projectModel.findOneAndUpdate({
+        _id: projectId
+    }, {
+        $set: {
+            [`fileTree.${folderPath}`]: {
+                directory: {}
+            }
+        }
+    }, {
+        new: true
+    })
+
+    return project;
+}
+
+export const createFileInFolder = async ({ projectId, filePath, content = '' }) => {
+    if (!projectId) {
+        throw new Error("projectId is required")
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        throw new Error("Invalid projectId")
+    }
+
+    if (!filePath) {
+        throw new Error("filePath is required")
+    }
+
+    const project = await projectModel.findOneAndUpdate({
+        _id: projectId
+    }, {
+        $set: {
+            [`fileTree.${filePath}`]: {
+                file: {
+                    contents: content
+                }
+            }
+        }
+    }, {
+        new: true
+    })
+
+    return project;
+}
+
+export const deleteFileOrFolder = async ({ projectId, path }) => {
+    if (!projectId) {
+        throw new Error("projectId is required")
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        throw new Error("Invalid projectId")
+    }
+
+    if (!path) {
+        throw new Error("path is required")
+    }
+
+    const project = await projectModel.findOneAndUpdate({
+        _id: projectId
+    }, {
+        $unset: {
+            [`fileTree.${path}`]: ""
+        }
+    }, {
+        new: true
+    })
+
+    return project;
+}

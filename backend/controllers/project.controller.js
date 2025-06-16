@@ -131,3 +131,107 @@ export const updateFileTree = async (req, res) => {
     }
 
 }
+
+export const updateFileContent = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+
+        const { projectId, fileName, content } = req.body;
+
+        const project = await projectService.updateFileContent({
+            projectId,
+            fileName,
+            content
+        })
+
+        return res.status(200).json({
+            project
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({ error: err.message })
+    }
+
+}
+
+export const createFolder = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { projectId, folderPath } = req.body;
+
+        const project = await projectService.createFolder({
+            projectId,
+            folderPath
+        })
+
+        return res.status(200).json({
+            project
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({ error: err.message })
+    }
+}
+
+export const createFileInFolder = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { projectId, filePath, content } = req.body;
+
+        const project = await projectService.createFileInFolder({
+            projectId,
+            filePath,
+            content
+        })
+
+        return res.status(200).json({
+            project
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({ error: err.message })
+    }
+}
+
+export const deleteFileOrFolder = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { projectId, path } = req.body;
+
+        const project = await projectService.deleteFileOrFolder({
+            projectId,
+            path
+        })
+
+        return res.status(200).json({
+            project
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({ error: err.message })
+    }
+}
