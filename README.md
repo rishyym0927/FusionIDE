@@ -1,7 +1,6 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150x150/4F46E5/FFFFFF?text=SOEN" alt="SOEN Logo" width="150" height="150">
   
-  # 🚀 SOEN - Collaborative Code Editor
+  # 🚀 FusionIDE - Collaborative Code Editor
   
   [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
   [![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://reactjs.org/)
