@@ -13,6 +13,7 @@ import CodeEditor from '../components/project/CodeEditor'
 import LogsPanel from '../components/project/LogsPanel'
 import ChatPanel from '../components/project/ChatPanel'
 import PreviewArea from '../components/project/PreviewArea'
+import CollaboratorPanel from '../components/project/CollaboratorPanel'
 
 const Project = () => {
     // Basic state
@@ -212,17 +213,24 @@ app.listen(3000, () => {
                             <StatusIndicator runStatus={runStatus} isDarkMode={isDarkMode} />
                         </div>
                         
-                        <ActionButtons 
-                            isRunning={isRunning}
-                            isInstalling={isInstalling}
-                            handleRunProject={handleRunProjectClick}
-                            handleStopProject={handleStopProject}
-                            showLogs={showLogs}
-                            setShowLogs={setShowLogs}
-                            isChatOpen={isChatOpen}
-                            setIsChatOpen={setIsChatOpen}
-                            isDarkMode={isDarkMode}
-                        />
+                        <div className="flex items-center gap-3">
+                            <CollaboratorPanel 
+                                project={project}
+                                isDarkMode={isDarkMode}
+                            />
+                            
+                            <ActionButtons 
+                                isRunning={isRunning}
+                                isInstalling={isInstalling}
+                                handleRunProject={handleRunProjectClick}
+                                handleStopProject={handleStopProject}
+                                showLogs={showLogs}
+                                setShowLogs={setShowLogs}
+                                isChatOpen={isChatOpen}
+                                setIsChatOpen={setIsChatOpen}
+                                isDarkMode={isDarkMode}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
