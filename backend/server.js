@@ -67,33 +67,65 @@ io.on('connection', socket => {
     socket.join(socket.roomId);
 
     socket.on('project-message', async data => {
-
         const message = data.message;
-
         const aiIsPresentInMessage = message.includes('@ai');
+        
+        // Broadcast to other users first
         socket.broadcast.to(socket.roomId).emit('project-message', data)
 
         if (aiIsPresentInMessage) {
-
-
-            const prompt = message.replace('@ai', '');
-
-            const result = await generateResult(prompt);
-
-
-            io.to(socket.roomId).emit('project-message', {
-                message: result,
-                sender: {
-                    _id: 'ai',
-                    email: 'AI'
+            try {
+                const prompt = message.replace('@ai', '').trim();
+                
+                if (!prompt) {
+                    io.to(socket.roomId).emit('project-message', {
+                        message: JSON.stringify({
+                            "text": "Please provide a prompt after @ai. For example: '@ai create a react component'"
+                        }),
+                        sender: {
+                            _id: 'ai',
+                            email: 'AI'
+                        }
+                    });
+                    return;
                 }
-            })
 
+                console.log('Generating AI response for prompt:', prompt);
+                const result = await generateResult(prompt);
+                console.log('AI response:', result);
 
-            return
+                // Validate that result is valid JSON
+                try {
+                    JSON.parse(result);
+                } catch (parseError) {
+                    console.error('Invalid JSON from AI:', parseError);
+                    throw new Error('AI returned invalid JSON');
+                }
+
+                io.to(socket.roomId).emit('project-message', {
+                    message: result,
+                    sender: {
+                        _id: 'ai',
+                        email: 'AI'
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error generating AI response:', error);
+                
+                // Send error message to users
+                io.to(socket.roomId).emit('project-message', {
+                    message: JSON.stringify({
+                        "text": "Sorry, I encountered an error while processing your request. Please try again."
+                    }),
+                    sender: {
+                        _id: 'ai',
+                        email: 'AI'
+                    }
+                });
+            }
+            return;
         }
-
-
     })
 
     socket.on('disconnect', () => {
