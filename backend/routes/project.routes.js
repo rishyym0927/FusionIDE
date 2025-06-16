@@ -30,6 +30,12 @@ router.get('/get-project/:projectId',
     projectController.getProjectById
 )
 
+// Add this new route for direct project access
+router.get('/:projectId',
+    authMiddleWare.authUser,
+    projectController.getProjectById
+)
+
 router.put('/update-file-tree',
     authMiddleWare.authUser,
     body('projectId').isString().withMessage('Project ID is required'),
