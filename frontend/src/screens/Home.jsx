@@ -1,13 +1,14 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { UserContext } from '../context/user.context'
+import { useTheme } from '../context/theme.context'
 import axios from "../config/axios"
 import { useNavigate } from 'react-router-dom'
 
 const Home = () => {
-
     const { user } = useContext(UserContext)
+    const { isDarkMode } = useTheme()
     const [ isModalOpen, setIsModalOpen ] = useState(false)
-    const [ projectName, setProjectName ] = useState(null)
+    const [ projectName, setProjectName ] = useState('')
     const [ project, setProject ] = useState([])
 
     const navigate = useNavigate()
@@ -22,80 +23,179 @@ const Home = () => {
             .then((res) => {
                 console.log(res)
                 setIsModalOpen(false)
+                setProjectName('')
+                // Refresh projects list
+                fetchProjects()
             })
             .catch((error) => {
                 console.log(error)
             })
     }
 
-    useEffect(() => {
+    const fetchProjects = () => {
         axios.get('/projects/all').then((res) => {
             setProject(res.data.projects)
-
         }).catch(err => {
             console.log(err)
         })
+    }
 
+    useEffect(() => {
+        fetchProjects()
     }, [])
 
     return (
-        <main className='p-4'>
-            <div className="projects flex flex-wrap gap-3">
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="project p-4 border border-slate-300 rounded-md">
-                    New Project
-                    <i className="ri-link ml-2"></i>
-                </button>
+        <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+            <div className="container mx-auto px-4 py-8">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            My Projects
+                        </h1>
+                        <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            Welcome back, {user?.email}
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate('/profile')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                            isDarkMode 
+                                ? 'bg-gray-800 text-white hover:bg-gray-700' 
+                                : 'bg-white text-gray-700 hover:bg-gray-100'
+                        } border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
+                    >
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                            isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
+                        }`}>
+                            {user?.email?.charAt(0).toUpperCase()}
+                        </div>
+                        Profile
+                    </button>
+                </div>
 
-                {
-                    project.map((project) => (
-                        <div key={project._id}
+                {/* Projects Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {/* New Project Button */}
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className={`p-6 rounded-lg border-2 border-dashed transition-all hover:scale-105 ${
+                            isDarkMode 
+                                ? 'border-gray-600 bg-gray-800 text-gray-400 hover:border-blue-500 hover:text-blue-400' 
+                                : 'border-gray-300 bg-white text-gray-600 hover:border-blue-500 hover:text-blue-600'
+                        }`}
+                    >
+                        <div className="flex flex-col items-center gap-3">
+                            <i className="ri-add-line text-3xl"></i>
+                            <span className="font-medium">New Project</span>
+                        </div>
+                    </button>
+
+                    {/* Project Cards */}
+                    {project.map((proj) => (
+                        <div 
+                            key={proj._id}
                             onClick={() => {
                                 navigate(`/project`, {
-                                    state: { project }
+                                    state: { project: proj }
                                 })
                             }}
-                            className="project flex flex-col gap-2 cursor-pointer p-4 border border-slate-300 rounded-md min-w-52 hover:bg-slate-200">
-                            <h2
-                                className='font-semibold'
-                            >{project.name}</h2>
-
-                            <div className="flex gap-2">
-                                <p> <small> <i className="ri-user-line"></i> Collaborators</small> :</p>
-                                {project.users.length}
+                            className={`p-6 rounded-lg cursor-pointer transition-all hover:scale-105 ${
+                                isDarkMode 
+                                    ? 'bg-gray-800 border border-gray-700 hover:bg-gray-750' 
+                                    : 'bg-white border border-gray-200 hover:shadow-lg'
+                            }`}
+                        >
+                            <div className="flex items-start justify-between mb-4">
+                                <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold ${
+                                    isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
+                                }`}>
+                                    {proj.name.charAt(0).toUpperCase()}
+                                </div>
+                                <i className={`ri-arrow-right-up-line text-lg ${
+                                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                }`}></i>
                             </div>
-
+                            
+                            <h3 className={`font-semibold text-lg mb-2 ${
+                                isDarkMode ? 'text-white' : 'text-gray-900'
+                            }`}>
+                                {proj.name}
+                            </h3>
+                            
+                            <div className="flex items-center gap-2">
+                                <i className={`ri-user-line text-sm ${
+                                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                }`}></i>
+                                <span className={`text-sm ${
+                                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                }`}>
+                                    {proj.users.length} collaborator{proj.users.length !== 1 ? 's' : ''}
+                                </span>
+                            </div>
                         </div>
-                    ))
-                }
-
-
-            </div>
-
-            {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-md shadow-md w-1/3">
-                        <h2 className="text-xl mb-4">Create New Project</h2>
-                        <form onSubmit={createProject}>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Project Name</label>
-                                <input
-                                    onChange={(e) => setProjectName(e.target.value)}
-                                    value={projectName}
-                                    type="text" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" required />
-                            </div>
-                            <div className="flex justify-end">
-                                <button type="button" className="mr-2 px-4 py-2 bg-gray-300 rounded-md" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md">Create</button>
-                            </div>
-                        </form>
-                    </div>
+                    ))}
                 </div>
-            )}
 
-
-        </main>
+                {/* Modal */}
+                {isModalOpen && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                        <div className={`p-8 rounded-lg shadow-xl w-full max-w-md mx-4 ${
+                            isDarkMode ? 'bg-gray-800' : 'bg-white'
+                        }`}>
+                            <h2 className={`text-2xl font-bold mb-6 ${
+                                isDarkMode ? 'text-white' : 'text-gray-900'
+                            }`}>
+                                Create New Project
+                            </h2>
+                            <form onSubmit={createProject}>
+                                <div className="mb-6">
+                                    <label className={`block text-sm font-medium mb-2 ${
+                                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                                    }`}>
+                                        Project Name
+                                    </label>
+                                    <input
+                                        onChange={(e) => setProjectName(e.target.value)}
+                                        value={projectName}
+                                        type="text"
+                                        className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                            isDarkMode 
+                                                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                                                : 'bg-white border-gray-300 text-gray-900'
+                                        }`}
+                                        placeholder="Enter project name"
+                                        required
+                                    />
+                                </div>
+                                <div className="flex gap-3">
+                                    <button 
+                                        type="button" 
+                                        className={`flex-1 px-4 py-3 rounded-lg font-medium transition-colors ${
+                                            isDarkMode 
+                                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                        onClick={() => {
+                                            setIsModalOpen(false)
+                                            setProjectName('')
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        type="submit" 
+                                        className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                                    >
+                                        Create Project
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
     )
 }
 
