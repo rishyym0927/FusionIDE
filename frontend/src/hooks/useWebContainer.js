@@ -25,12 +25,23 @@ export const useWebContainer = () => {
         }
 
         try {
+            // Clear existing state and stop any running processes
+            if (runProcess) {
+                runProcess.kill()
+                setRunProcess(null)
+            }
+            
             setRunStatus('installing')
             setIsInstalling(true)
+            setIsRunning(false)
             setRunLogs([])
+            setIframeUrl(null)
             
+            // Clear the WebContainer and mount fresh file tree
+            setRunLogs(prev => [...prev, '[Info] Mounting fresh file tree...'])
             await webContainer.mount(fileTree)
             
+            setRunLogs(prev => [...prev, '[Info] Installing dependencies...'])
             const installProcess = await webContainer.spawn("npm", ["install"])
             
             installProcess.output.pipeTo(new WritableStream({
@@ -40,16 +51,18 @@ export const useWebContainer = () => {
                 }
             }))
             
-            await installProcess.exit
+            const installExitCode = await installProcess.exit
             setIsInstalling(false)
             
-            if (runProcess) {
-                runProcess.kill()
-                setIsRunning(false)
+            if (installExitCode !== 0) {
+                setRunStatus('error')
+                setRunLogs(prev => [...prev, '[Error] Installation failed'])
+                return
             }
             
             setRunStatus('running')
             setIsRunning(true)
+            setRunLogs(prev => [...prev, '[Info] Starting application...'])
             
             let tempRunProcess = await webContainer.spawn("npm", ["start"])
             
@@ -62,6 +75,7 @@ export const useWebContainer = () => {
             
             setRunProcess(tempRunProcess)
             
+            // Listen for server ready event
             webContainer.on('server-ready', (port, url) => {
                 console.log('Server ready:', port, url)
                 setIframeUrl(url)

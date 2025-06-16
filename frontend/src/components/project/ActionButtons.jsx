@@ -8,7 +8,8 @@ const ActionButtons = ({
     showLogs, 
     setShowLogs, 
     isChatOpen, 
-    setIsChatOpen 
+    setIsChatOpen,
+    isDarkMode 
 }) => {
     return (
         <div className="flex items-center gap-3">
@@ -50,8 +51,8 @@ const ActionButtons = ({
                 onClick={() => setShowLogs(!showLogs)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 btn-hover ${
                     showLogs 
-                        ? 'bg-gray-700 text-white shadow-lg' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? (isDarkMode ? 'bg-gray-600 text-white shadow-lg' : 'bg-gray-700 text-white shadow-lg')
+                        : (isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')
                 }`}
             >
                 <i className="ri-terminal-line"></i>
@@ -64,7 +65,7 @@ const ActionButtons = ({
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 btn-hover ${
                     isChatOpen 
                         ? 'bg-primary-500 text-white shadow-lg shadow-primary-200' 
-                        : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
+                        : (isDarkMode ? 'bg-primary-900 text-primary-300 hover:bg-primary-800' : 'bg-primary-50 text-primary-600 hover:bg-primary-100')
                 }`}
             >
                 <i className="ri-chat-3-line"></i>

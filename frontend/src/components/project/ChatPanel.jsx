@@ -7,7 +7,8 @@ const ChatPanel = ({
     currentMessage, 
     setCurrentMessage, 
     handleSendMessage, 
-    user 
+    user,
+    isDarkMode 
 }) => {
     const messagesEndRef = useRef(null)
 
@@ -22,7 +23,9 @@ const ChatPanel = ({
     if (!isChatOpen) return null
 
     return (
-        <div className="w-80 bg-white border-l border-gray-200 flex flex-col animate-slide-up shadow-xl">
+        <div className={`w-80 border-l flex flex-col animate-slide-up shadow-xl ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        }`}>
             {/* Chat Header */}
             <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
@@ -43,14 +46,24 @@ const ChatPanel = ({
             </div>
             
             {/* Messages Area */}
-            <div className="flex-1 overflow-auto p-4 space-y-4 custom-scrollbar bg-gray-50">
+            <div className={`flex-1 overflow-auto p-4 space-y-4 custom-scrollbar ${
+                isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+            }`}>
                 {messages.length === 0 && (
                     <div className="text-center py-8 animate-fade-in">
-                        <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i className="ri-chat-smile-2-line text-primary-500 text-2xl"></i>
+                        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                            isDarkMode ? 'bg-primary-900' : 'bg-primary-100'
+                        }`}>
+                            <i className={`ri-chat-smile-2-line text-2xl ${
+                                isDarkMode ? 'text-primary-400' : 'text-primary-500'
+                            }`}></i>
                         </div>
-                        <p className="text-gray-600 font-medium mb-2">Start chatting with AI!</p>
-                        <p className="text-sm text-gray-500">Use @ai to get help with your code</p>
+                        <p className={`font-medium mb-2 ${
+                            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>Start chatting with AI!</p>
+                        <p className={`text-sm ${
+                            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>Use @ai to get help with your code</p>
                     </div>
                 )}
                 
@@ -69,8 +82,8 @@ const ChatPanel = ({
                                 message.sender._id === user?._id
                                     ? 'bg-primary-500 text-white'
                                     : message.sender._id === 'ai'
-                                    ? 'bg-green-100 text-green-600'
-                                    : 'bg-gray-200 text-gray-600'
+                                    ? (isDarkMode ? 'bg-green-800 text-green-300' : 'bg-green-100 text-green-600')
+                                    : (isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600')
                             }`}>
                                 {message.sender._id === 'ai' ? 'AI' : message.sender.email?.charAt(0).toUpperCase()}
                             </div>
@@ -80,8 +93,14 @@ const ChatPanel = ({
                                 message.sender._id === user?._id
                                     ? 'bg-primary-500 text-white rounded-br-md'
                                     : message.sender._id === 'ai'
-                                    ? 'bg-white border border-green-200 text-gray-800 rounded-bl-md'
-                                    : 'bg-white border border-gray-200 text-gray-800 rounded-bl-md'
+                                    ? (isDarkMode 
+                                        ? 'bg-gray-700 border border-green-700 text-gray-200 rounded-bl-md' 
+                                        : 'bg-white border border-green-200 text-gray-800 rounded-bl-md'
+                                    )
+                                    : (isDarkMode 
+                                        ? 'bg-gray-700 border border-gray-600 text-gray-200 rounded-bl-md' 
+                                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-md'
+                                    )
                             }`}>
                                 <div className="text-sm whitespace-pre-wrap leading-relaxed">
                                     {message.message}
@@ -94,14 +113,20 @@ const ChatPanel = ({
             </div>
 
             {/* Input Area */}
-            <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-gray-200">
+            <form onSubmit={handleSendMessage} className={`p-4 border-t ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            }`}>
                 <div className="flex gap-3">
                     <input
                         type="text"
                         value={currentMessage}
                         onChange={(e) => setCurrentMessage(e.target.value)}
                         placeholder="Type @ai for AI help..."
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                        className={`flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 ${
+                            isDarkMode 
+                                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                                : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                     />
                     <button
                         type="submit"

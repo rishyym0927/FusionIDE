@@ -1,47 +1,158 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
-const PreviewArea = ({ isChatOpen, iframeUrl }) => {
+const PreviewArea = ({ isChatOpen, iframeUrl, isDarkMode }) => {
+    const [currentUrl, setCurrentUrl] = useState('')
+    const [inputUrl, setInputUrl] = useState('')
+
+    useEffect(() => {
+        if (iframeUrl) {
+            setCurrentUrl(iframeUrl)
+            setInputUrl(iframeUrl)
+        }
+    }, [iframeUrl])
+
+    const handleUrlChange = (e) => {
+        setInputUrl(e.target.value)
+    }
+
+    const handleNavigate = (e) => {
+        e.preventDefault()
+        let url = inputUrl.trim()
+        
+        // If it's a relative path, append to base URL
+        if (url.startsWith('/') && iframeUrl) {
+            const baseUrl = new URL(iframeUrl).origin
+            url = baseUrl + url
+        }
+        // If it doesn't have protocol, assume it's a path
+        else if (!url.startsWith('http') && iframeUrl) {
+            const baseUrl = new URL(iframeUrl).origin
+            url = baseUrl + (url.startsWith('/') ? url : '/' + url)
+        }
+        
+        setCurrentUrl(url)
+    }
+
+    const handleRefresh = () => {
+        setCurrentUrl(prev => prev + '?refresh=' + Date.now())
+    }
+
+    const handleGoBack = () => {
+        const iframe = document.getElementById('preview-iframe')
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.history.back()
+        }
+    }
+
+    const handleGoForward = () => {
+        const iframe = document.getElementById('preview-iframe')
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.history.forward()
+        }
+    }
+
     return (
-        <div className={`${isChatOpen ? 'flex-1' : 'w-1/2'} bg-white border-l border-gray-200 flex flex-col`}>
+        <div className={`${isChatOpen ? 'w-3/5' : 'w-96'} ${
+            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        } border-l flex flex-col`}>
             {/* Preview Header */}
-            <div className="bg-white p-4 border-b border-gray-200 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <i className="ri-window-line text-primary-500"></i>
-                    <span className="font-semibold text-gray-800">Preview</span>
-                </div>
-                {iframeUrl && (
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <span className="text-sm text-gray-600">Live</span>
+            <div className={`p-4 border-b ${
+                isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            }`}>
+                <div className="flex items-center gap-2 mb-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                        isDarkMode ? 'bg-blue-900' : 'bg-blue-100'
+                    }`}>
+                        <i className={`ri-global-line text-sm ${
+                            isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                        }`}></i>
                     </div>
-                )}
+                    <h3 className={`font-semibold ${
+                        isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>Preview</h3>
+                </div>
+                
+                {/* Navigation Controls */}
+                <div className="flex items-center gap-2 mb-2">
+                    <button
+                        onClick={handleGoBack}
+                        className={`p-2 rounded-md transition-colors ${
+                            isDarkMode 
+                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                        title="Go Back"
+                    >
+                        <i className="ri-arrow-left-line text-sm"></i>
+                    </button>
+                    
+                    <button
+                        onClick={handleGoForward}
+                        className={`p-2 rounded-md transition-colors ${
+                            isDarkMode 
+                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                        title="Go Forward"
+                    >
+                        <i className="ri-arrow-right-line text-sm"></i>
+                    </button>
+                    
+                    <button
+                        onClick={handleRefresh}
+                        className={`p-2 rounded-md transition-colors ${
+                            isDarkMode 
+                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                        title="Refresh"
+                    >
+                        <i className="ri-refresh-line text-sm"></i>
+                    </button>
+                </div>
+
+                {/* URL Input */}
+                <form onSubmit={handleNavigate} className="flex items-center gap-2">
+                    <div className="flex-1 relative">
+                        <input
+                            type="text"
+                            value={inputUrl}
+                            onChange={handleUrlChange}
+                            placeholder="Enter URL or path (e.g., /api/users)"
+                            className={`w-full px-3 py-2 rounded-md border text-sm ${
+                                isDarkMode 
+                                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500'
+                            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                    >
+                        Go
+                    </button>
+                </form>
             </div>
 
             {/* Preview Content */}
-            <div className="flex-1 relative bg-gray-100">
-                {iframeUrl ? (
-                    <div className="h-full p-4">
-                        <div className="h-full bg-white rounded-lg shadow-lg overflow-hidden">
-                            <iframe
-                                src={iframeUrl}
-                                className="w-full h-full border-0"
-                                title="Application Preview"
-                            />
-                        </div>
-                    </div>
+            <div className="flex-1 overflow-hidden">
+                {currentUrl ? (
+                    <iframe
+                        id="preview-iframe"
+                        src={currentUrl}
+                        className="w-full h-full border-0"
+                        title="Project Preview"
+                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                    />
                 ) : (
-                    <div className="flex items-center justify-center h-full">
-                        <div className="text-center animate-fade-in">
-                            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <i className="ri-play-circle-line text-gray-400 text-3xl"></i>
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-700 mb-2">Ready to Preview</h3>
-                            <p className="text-gray-500 mb-4">Click "Run" to see your application in action</p>
-                            <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
-                                <i className="ri-lightbulb-line"></i>
-                                <span>Your app will appear here once it's running</span>
-                            </div>
-                        </div>
+                    <div className={`h-full flex flex-col items-center justify-center ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    }`}>
+                        <i className="ri-global-line text-4xl mb-4"></i>
+                        <p className="text-center">
+                            Start your project to see the preview
+                        </p>
                     </div>
                 )}
             </div>

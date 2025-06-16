@@ -1,11 +1,15 @@
 import React from 'react'
 
-const LogsPanel = ({ showLogs, runLogs, setRunLogs }) => {
+const LogsPanel = ({ showLogs, runLogs, setRunLogs, isDarkMode }) => {
     if (!showLogs) return null
 
     return (
-        <div className="logs-panel bg-dark-900 text-green-400 border-t border-gray-700 animate-slide-up">
-            <div className="bg-dark-800 px-6 py-3 border-b border-gray-700 flex justify-between items-center">
+        <div className={`logs-panel text-green-400 border-t animate-slide-up ${
+            isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-gray-900 border-gray-300'
+        }`}>
+            <div className={`px-6 py-3 border-b flex justify-between items-center ${
+                isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-800 border-gray-600'
+            }`}>
                 <div className="flex items-center gap-3">
                     <i className="ri-terminal-line text-green-400"></i>
                     <h3 className="text-white font-semibold">Console Output</h3>
