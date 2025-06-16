@@ -91,44 +91,46 @@ const Project = () => {
     return (
         <div className={`h-screen flex flex-col ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
             {/* Modern Header */}
-            <div className={`border-b shadow-sm ${
+            <div className={`border-b ${
                 isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
             }`}>
-                <div className="px-6 py-4">
+                <div className="px-6 py-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => navigate('/')}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                                     isDarkMode 
                                         ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
                             >
-                                <i className="ri-arrow-left-line"></i>
+                                <i className="ri-arrow-left-line text-sm"></i>
                                 Back
                             </button>
+                            
                             <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                    isDarkMode ? 'bg-primary-900' : 'bg-primary-100'
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                    isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
                                 }`}>
-                                    <i className={`ri-code-box-line text-lg ${
-                                        isDarkMode ? 'text-primary-400' : 'text-primary-600'
+                                    <i className={`ri-code-box-line text-sm ${
+                                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
                                     }`}></i>
                                 </div>
                                 <div>
-                                    <h1 className={`text-xl font-bold ${
+                                    <h1 className={`text-lg font-semibold ${
                                         isDarkMode ? 'text-white' : 'text-gray-900'
                                     }`}>{displayProject?.name || 'Untitled Project'}</h1>
-                                    <p className={`text-sm ${
-                                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                                    }`}>Interactive Development Environment</p>
+                                    <p className={`text-xs ${
+                                        isDarkMode ? 'text-gray-500' : 'text-gray-500'
+                                    }`}>Development Environment</p>
                                 </div>
                             </div>
+                            
                             <StatusIndicator runStatus={runStatus} isDarkMode={isDarkMode} />
                         </div>
                         
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                             <CollaboratorPanel 
                                 project={displayProject}
                                 isDarkMode={isDarkMode}

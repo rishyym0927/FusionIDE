@@ -13,63 +13,79 @@ const ActionButtons = ({
 }) => {
     return (
         <div className="flex items-center gap-3">
-            {/* Run/Stop Button */}
+            {/* Run/Stop Button - Primary Action */}
             {!isRunning ? (
                 <button
                     onClick={handleRunProject}
                     disabled={isInstalling}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium transition-all duration-200 ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         isInstalling 
-                            ? 'bg-yellow-500 cursor-not-allowed' 
-                            : 'bg-green-500 hover:bg-green-600 btn-hover shadow-lg hover:shadow-green-200'
+                            ? isDarkMode
+                                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                            : isDarkMode
+                                ? 'bg-green-600 text-white hover:bg-green-700'
+                                : 'bg-green-600 text-white hover:bg-green-700'
                     }`}
                 >
                     {isInstalling ? (
                         <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Installing...
+                            <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                            <span>Installing...</span>
                         </>
                     ) : (
                         <>
-                            <i className="ri-play-fill"></i>
-                            Run Project
+                            <i className="ri-play-fill text-sm"></i>
+                            <span>Run</span>
                         </>
                     )}
                 </button>
             ) : (
                 <button
                     onClick={handleStopProject}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium btn-hover shadow-lg hover:shadow-red-200 transition-all duration-200"
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        isDarkMode
+                            ? 'bg-red-600 text-white hover:bg-red-700'
+                            : 'bg-red-600 text-white hover:bg-red-700'
+                    }`}
                 >
-                    <i className="ri-stop-fill"></i>
-                    Stop
+                    <i className="ri-stop-fill text-sm"></i>
+                    <span>Stop</span>
                 </button>
             )}
 
             {/* Logs Toggle Button */}
             <button
                 onClick={() => setShowLogs(!showLogs)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 btn-hover ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     showLogs 
-                        ? (isDarkMode ? 'bg-gray-600 text-white shadow-lg' : 'bg-gray-700 text-white shadow-lg')
-                        : (isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')
+                        ? isDarkMode
+                            ? 'bg-gray-600 text-white'
+                            : 'bg-gray-700 text-white'
+                        : isDarkMode 
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
             >
-                <i className="ri-terminal-line"></i>
-                Logs
+                <i className="ri-terminal-line text-sm"></i>
+                <span>Logs</span>
             </button>
 
             {/* Chat Toggle Button */}
             <button
                 onClick={() => setIsChatOpen(!isChatOpen)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 btn-hover ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isChatOpen 
-                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-200' 
-                        : (isDarkMode ? 'bg-primary-900 text-primary-300 hover:bg-primary-800' : 'bg-primary-50 text-primary-600 hover:bg-primary-100')
+                        ? isDarkMode
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-blue-600 text-white'
+                        : isDarkMode 
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
             >
-                <i className="ri-chat-3-line"></i>
-                AI Assistant
+                <i className="ri-robot-line text-sm"></i>
+                <span>AI Chat</span>
             </button>
         </div>
     )
