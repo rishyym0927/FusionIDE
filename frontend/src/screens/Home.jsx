@@ -10,6 +10,7 @@ const Home = () => {
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ projectName, setProjectName ] = useState('')
     const [ project, setProject ] = useState([])
+    const [ loading, setLoading ] = useState(false)
 
     const navigate = useNavigate()
 
@@ -17,27 +18,41 @@ const Home = () => {
         e.preventDefault()
         console.log({ projectName })
 
+        setLoading(true)
         axios.post('/projects/create', {
             name: projectName,
         })
             .then((res) => {
-                console.log(res)
+                console.log('Project created:', res.data)
                 setIsModalOpen(false)
                 setProjectName('')
-                // Refresh projects list
+                // Add the new project to the existing list
+                setProject(prev => [...prev, res.data])
+                // Also refresh the full list to ensure consistency
                 fetchProjects()
             })
             .catch((error) => {
-                console.log(error)
+                console.log('Error creating project:', error)
+            })
+            .finally(() => {
+                setLoading(false)
             })
     }
 
     const fetchProjects = () => {
-        axios.get('/projects/all').then((res) => {
-            setProject(res.data.projects)
-        }).catch(err => {
-            console.log(err)
-        })
+        setLoading(true)
+        axios.get('/projects/all')
+            .then((res) => {
+                console.log('Fetched projects:', res.data)
+                setProject(res.data.projects || [])
+            })
+            .catch(err => {
+                console.log('Error fetching projects:', err)
+                setProject([])
+            })
+            .finally(() => {
+                setLoading(false)
+            })
     }
 
     useEffect(() => {
@@ -74,12 +89,20 @@ const Home = () => {
                     </button>
                 </div>
 
+                {/* Loading State */}
+                {loading && (
+                    <div className="flex justify-center items-center py-8">
+                        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                )}
+
                 {/* Projects Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {/* New Project Button */}
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className={`p-6 rounded-lg border-2 border-dashed transition-all hover:scale-105 ${
+                        disabled={loading}
+                        className={`p-6 rounded-lg border-2 border-dashed transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
                             isDarkMode 
                                 ? 'border-gray-600 bg-gray-800 text-gray-400 hover:border-blue-500 hover:text-blue-400' 
                                 : 'border-gray-300 bg-white text-gray-600 hover:border-blue-500 hover:text-blue-600'
@@ -92,7 +115,7 @@ const Home = () => {
                     </button>
 
                     {/* Project Cards */}
-                    {project.map((proj) => (
+                    {Array.isArray(project) && project.map((proj) => (
                         <div 
                             key={proj._id}
                             onClick={() => {
@@ -110,7 +133,7 @@ const Home = () => {
                                 <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold ${
                                     isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
                                 }`}>
-                                    {proj.name.charAt(0).toUpperCase()}
+                                    {proj.name?.charAt(0).toUpperCase() || 'P'}
                                 </div>
                                 <i className={`ri-arrow-right-up-line text-lg ${
                                     isDarkMode ? 'text-gray-400' : 'text-gray-500'
@@ -130,11 +153,22 @@ const Home = () => {
                                 <span className={`text-sm ${
                                     isDarkMode ? 'text-gray-400' : 'text-gray-600'
                                 }`}>
-                                    {proj.users.length} collaborator{proj.users.length !== 1 ? 's' : ''}
+                                    {proj.users?.length || 0} collaborator{(proj.users?.length || 0) !== 1 ? 's' : ''}
                                 </span>
                             </div>
                         </div>
                     ))}
+
+                    {/* Empty State */}
+                    {!loading && (!Array.isArray(project) || project.length === 0) && (
+                        <div className={`col-span-full text-center py-12 ${
+                            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
+                            <i className="ri-folder-open-line text-4xl mb-4"></i>
+                            <p className="text-lg mb-2">No projects yet</p>
+                            <p className="text-sm">Create your first project to get started</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Modal */}
@@ -166,6 +200,7 @@ const Home = () => {
                                         }`}
                                         placeholder="Enter project name"
                                         required
+                                        disabled={loading}
                                     />
                                 </div>
                                 <div className="flex gap-3">
@@ -180,14 +215,16 @@ const Home = () => {
                                             setIsModalOpen(false)
                                             setProjectName('')
                                         }}
+                                        disabled={loading}
                                     >
                                         Cancel
                                     </button>
                                     <button 
                                         type="submit" 
-                                        className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                                        className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={loading}
                                     >
-                                        Create Project
+                                        {loading ? 'Creating...' : 'Create Project'}
                                     </button>
                                 </div>
                             </form>

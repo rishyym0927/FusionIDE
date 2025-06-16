@@ -44,5 +44,17 @@ router.put('/update-filetree',
     projectController.updateFileTree
 )
 
+router.put('/merge-filetree',
+    authMiddleWare.authUser,
+    body('projectId').isString().withMessage('Project ID is required'),
+    body('newFiles').isObject().withMessage('New files object is required'),
+    projectController.mergeFileTree
+)
+
+router.get('/:projectId/messages',
+    authMiddleWare.authUser,
+    projectController.getProjectMessages
+)
+
 
 export default router;

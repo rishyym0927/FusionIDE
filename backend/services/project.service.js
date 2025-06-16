@@ -36,7 +36,7 @@ export const getAllProjectByUserId = async ({ userId }) => {
 
     const allUserProjects = await projectModel.find({
         users: userId
-    })
+    }).populate('users')
 
     return allUserProjects
 }
@@ -130,6 +130,42 @@ export const updateFileTree = async ({ projectId, fileTree }) => {
         _id: projectId
     }, {
         fileTree
+    }, {
+        new: true
+    })
+
+    return project;
+}
+
+export const mergeFileTree = async ({ projectId, newFiles }) => {
+    if (!projectId) {
+        throw new Error("projectId is required")
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        throw new Error("Invalid projectId")
+    }
+
+    if (!newFiles) {
+        throw new Error("newFiles is required")
+    }
+
+    // Get current project
+    const currentProject = await projectModel.findById(projectId);
+    if (!currentProject) {
+        throw new Error("Project not found")
+    }
+
+    // Merge existing fileTree with new files
+    const mergedFileTree = {
+        ...currentProject.fileTree,
+        ...newFiles
+    };
+
+    const project = await projectModel.findOneAndUpdate({
+        _id: projectId
+    }, {
+        fileTree: mergedFileTree
     }, {
         new: true
     })

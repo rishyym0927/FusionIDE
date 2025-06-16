@@ -48,6 +48,11 @@ const Project = () => {
     useEffect(() => {
         if (project?.fileTree && Object.keys(project.fileTree).length > 0) {
             setFileTree(project.fileTree)
+            // Set selectedFile to first available file if app.js doesn't exist
+            const files = Object.keys(project.fileTree);
+            if (files.length > 0 && !project.fileTree['app.js']) {
+                setSelectedFile(files[0]);
+            }
         } else {
             // Default file tree from temp.md
             setFileTree({
@@ -90,6 +95,29 @@ app.listen(3000, () => {
             })
         }
     }, [project])
+
+    // Auto-save functionality
+    const autoSaveFileTree = async (newFileTree) => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/projects/update-filetree`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    projectId: project._id,
+                    fileTree: newFileTree
+                })
+            });
+
+            if (response.ok) {
+                console.log('FileTree auto-saved successfully');
+            }
+        } catch (error) {
+            console.error('Error auto-saving fileTree:', error);
+        }
+    };
 
     const handleRunProjectClick = () => {
         // Ensure we're using the most current file tree
@@ -142,15 +170,17 @@ app.listen(3000, () => {
 
     const handleCreateFile = (fileName) => {
         if (fileName && !fileTree[fileName]) {
-            setFileTree(prev => ({
-                ...prev,
+            const newFileTree = {
+                ...fileTree,
                 [fileName]: {
                     file: {
                         contents: ''
                     }
                 }
-            }))
-            setSelectedFile(fileName)
+            };
+            setFileTree(newFileTree);
+            setSelectedFile(fileName);
+            autoSaveFileTree(newFileTree);
         }
     }
 
@@ -165,6 +195,8 @@ app.listen(3000, () => {
                 const remainingFiles = Object.keys(newFileTree)
                 setSelectedFile(remainingFiles.length > 0 ? remainingFiles[0] : null)
             }
+            
+            autoSaveFileTree(newFileTree);
         }
     }
 

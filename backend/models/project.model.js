@@ -20,7 +20,12 @@ const projectSchema = new mongoose.Schema({
         type: Object,
         default: {}
     },
-
+    messages: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'message'
+        }
+    ]
 })
 
 
