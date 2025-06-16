@@ -95,7 +95,7 @@ export const useSocket = (project, user, setFileTree) => {
 
     const saveFileTreeToDatabase = async (fileTree) => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/projects/update-filetree`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/update-filetree`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
