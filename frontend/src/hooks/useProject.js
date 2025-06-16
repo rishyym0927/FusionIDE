@@ -2,8 +2,17 @@ import { useState, useEffect } from 'react'
 
 export const useProject = (project) => {
     const [fileTree, setFileTree] = useState({})
-    const [selectedFile, setSelectedFile] = useState('README.md')
+    const [selectedFile, setSelectedFile] = useState(null)
     const [isFileModified, setIsFileModified] = useState(false)
+
+    // Debug logging
+    useEffect(() => {
+        console.log('Selected file changed to:', selectedFile)
+    }, [selectedFile])
+
+    useEffect(() => {
+        console.log('File tree updated:', Object.keys(fileTree))
+    }, [fileTree])
 
     // Auto-save functionality with better error handling
     const autoSaveFileTree = async (newFileTree) => {
@@ -37,6 +46,11 @@ export const useProject = (project) => {
     }
 
     const handleSaveFile = async () => {
+        if (!project?._id) {
+            console.error('No project ID available for saving')
+            return
+        }
+
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/update-filetree`, {
                 method: 'PUT',

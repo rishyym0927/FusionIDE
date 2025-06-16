@@ -9,11 +9,13 @@ export const useFileOperations = ({
     autoSaveFileTree 
 }) => {
     const handleFileSelect = useCallback((fileName) => {
+        console.log('Selecting file:', fileName) // Debug log
         setSelectedFile(fileName)
         setIsFileModified(false)
     }, [setSelectedFile, setIsFileModified])
 
     const handleFileContentChange = useCallback((fileName, newContent) => {
+        console.log('Changing content for file:', fileName) // Debug log
         setFileTree(prev => ({
             ...prev,
             [fileName]: {

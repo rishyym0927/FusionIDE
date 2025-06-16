@@ -115,7 +115,12 @@ const FileExplorer = ({ fileTree, selectedFile, handleFileSelect, handleCreateFi
                 {Object.keys(fileTree).map((fileName) => (
                     <div key={fileName} className="group relative">
                         <button
-                            onClick={() => handleFileSelect(fileName)}
+                            onClick={() => {
+                                console.log('FileExplorer: File clicked:', fileName)
+                                console.log('FileExplorer: Current selectedFile:', selectedFile)
+                                console.log('FileExplorer: Available files:', Object.keys(fileTree))
+                                handleFileSelect(fileName)
+                            }}
                             className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200 ${
                                 selectedFile === fileName 
                                     ? (isDarkMode 

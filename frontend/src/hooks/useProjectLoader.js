@@ -1,8 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { getDefaultFileTree } from '../utils/defaultFileTree'
 
 export const useProjectLoader = (project, setFileTree, setSelectedFile, autoSaveFileTree) => {
+    const hasInitialized = useRef(false)
+
     useEffect(() => {
+        if (hasInitialized.current) return // Prevent multiple initializations
+
         const loadProjectFileTree = async () => {
             if (project?._id) {
                 try {
@@ -18,15 +22,13 @@ export const useProjectLoader = (project, setFileTree, setSelectedFile, autoSave
                         const projectData = await response.json()
                         if (projectData.fileTree && Object.keys(projectData.fileTree).length > 0) {
                             setFileTree(projectData.fileTree)
-                            // Set selectedFile to first available file
+                            // Only set selectedFile if none is currently selected
                             const files = Object.keys(projectData.fileTree)
                             if (files.length > 0) {
-                                if (projectData.fileTree['README.md']) {
-                                    setSelectedFile('README.md')
-                                } else {
-                                    setSelectedFile(files[0])
-                                }
+                                const preferredFile = files.includes('README.md') ? 'README.md' : files[0]
+                                setSelectedFile(preferredFile)
                             }
+                            hasInitialized.current = true
                             return // Exit early if we loaded from backend
                         }
                     }
@@ -40,11 +42,8 @@ export const useProjectLoader = (project, setFileTree, setSelectedFile, autoSave
                 setFileTree(project.fileTree)
                 const files = Object.keys(project.fileTree)
                 if (files.length > 0) {
-                    if (project.fileTree['README.md']) {
-                        setSelectedFile('README.md')
-                    } else {
-                        setSelectedFile(files[0])
-                    }
+                    const preferredFile = files.includes('README.md') ? 'README.md' : files[0]
+                    setSelectedFile(preferredFile)
                 }
             } else {
                 // Default README.md file with comprehensive instructions
@@ -58,6 +57,7 @@ export const useProjectLoader = (project, setFileTree, setSelectedFile, autoSave
                     autoSaveFileTree(defaultFileTree)
                 }
             }
+            hasInitialized.current = true
         }
 
         loadProjectFileTree()
