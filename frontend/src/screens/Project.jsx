@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { UserContext } from '../context/user.context'
 import { useTheme } from '../context/theme.context'
 import { useWebContainer } from '../hooks/useWebContainer'
@@ -23,10 +23,16 @@ const Project = () => {
     const [showLogs, setShowLogs] = useState(false)
     const [isChatOpen, setIsChatOpen] = useState(false)
     const [currentMessage, setCurrentMessage] = useState('')
+    const [projectData, setProjectData] = useState(null)
 
     const location = useLocation()
     const navigate = useNavigate()
-    const { project } = location.state || {}
+    const params = useParams()
+    const { project: locationProject } = location.state || {}
+    
+    // Use project from location.state or create a basic project object with ID from params
+    const project = locationProject || { _id: params.projectId, name: 'Loading...' }
+    
     const { user } = useContext(UserContext)
     const { isDarkMode } = useTheme()
 
@@ -64,8 +70,8 @@ const Project = () => {
 
     const { messages, handleSendMessage } = useSocket(project, user, setFileTree)
 
-    // Load project data
-    useProjectLoader(project, setFileTree, setSelectedFile, autoSaveFileTree)
+    // Load project data - pass setProjectData to update project info
+    useProjectLoader(project, setFileTree, setSelectedFile, autoSaveFileTree, setProjectData)
 
     const handleRunProjectClick = () => {
         // Ensure we're using the most current file tree
@@ -78,6 +84,9 @@ const Project = () => {
         e.preventDefault()
         handleSendMessage(currentMessage, setCurrentMessage)
     }
+
+    // Use projectData if available, otherwise fall back to project
+    const displayProject = projectData || project
 
     return (
         <div className={`h-screen flex flex-col ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -110,7 +119,7 @@ const Project = () => {
                                 <div>
                                     <h1 className={`text-xl font-bold ${
                                         isDarkMode ? 'text-white' : 'text-gray-900'
-                                    }`}>{project?.name || 'Untitled Project'}</h1>
+                                    }`}>{displayProject?.name || 'Untitled Project'}</h1>
                                     <p className={`text-sm ${
                                         isDarkMode ? 'text-gray-400' : 'text-gray-500'
                                     }`}>Interactive Development Environment</p>
@@ -121,7 +130,7 @@ const Project = () => {
                         
                         <div className="flex items-center gap-3">
                             <CollaboratorPanel 
-                                project={project}
+                                project={displayProject}
                                 isDarkMode={isDarkMode}
                             />
                             

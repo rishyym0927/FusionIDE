@@ -96,9 +96,7 @@ export const getProjectById = async (req, res) => {
 
         const project = await projectService.getProjectById({ projectId });
 
-        return res.status(200).json({
-            project
-        })
+        return res.status(200).json(project)
 
     } catch (err) {
         console.log(err)

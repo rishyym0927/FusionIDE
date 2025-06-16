@@ -110,6 +110,15 @@ export const getProjectById = async ({ projectId }) => {
         _id: projectId
     }).populate('users')
 
+    if (!project) {
+        throw new Error("Project not found")
+    }
+
+    // Ensure fileTree is initialized
+    if (!project.fileTree) {
+        project.fileTree = {}
+    }
+
     return project;
 }
 
@@ -126,6 +135,8 @@ export const updateFileTree = async ({ projectId, fileTree }) => {
         throw new Error("fileTree is required")
     }
 
+    console.log('Updating fileTree for project:', projectId, 'with data:', Object.keys(fileTree))
+
     const project = await projectModel.findOneAndUpdate({
         _id: projectId
     }, {
@@ -134,6 +145,11 @@ export const updateFileTree = async ({ projectId, fileTree }) => {
         new: true
     })
 
+    if (!project) {
+        throw new Error("Project not found")
+    }
+
+    console.log('FileTree updated successfully')
     return project;
 }
 
