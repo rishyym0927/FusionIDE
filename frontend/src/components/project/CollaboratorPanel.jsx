@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import axios from '../../config/axios'
 
-const CollaboratorPanel = ({ project, isDarkMode }) => {
+const CollaboratorPanel = ({ project, isDarkMode, onProjectUpdate }) => {
     const [isOpen, setIsOpen] = useState(false)
     const [users, setUsers] = useState([])
     const [selectedUsers, setSelectedUsers] = useState([])
     const [loading, setLoading] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    const [currentProject, setCurrentProject] = useState(project)
+
+    // Update local project state when prop changes
+    useEffect(() => {
+        setCurrentProject(project)
+    }, [project])
 
     // Fetch all users when panel opens
     useEffect(() => {
@@ -32,14 +38,19 @@ const CollaboratorPanel = ({ project, isDarkMode }) => {
 
         try {
             setLoading(true)
-            await axios.put('/projects/add-user', {
-                projectId: project._id,
+            const response = await axios.put('/projects/add-user', {
+                projectId: currentProject._id,
                 users: selectedUsers
             })
             
+            // Update local project state immediately
+            setCurrentProject(response.data.project)
             setSelectedUsers([])
-            setIsOpen(false)
-            // Optionally refresh project data here
+            
+            // Call the callback to refresh project data in parent
+            if (onProjectUpdate) {
+                onProjectUpdate()
+            }
         } catch (error) {
             console.error('Error adding collaborators:', error)
         } finally {
@@ -57,7 +68,7 @@ const CollaboratorPanel = ({ project, isDarkMode }) => {
 
     const filteredUsers = users.filter(user => 
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !project.users.some(projUser => projUser._id === user._id)
+        !currentProject.users.some(projUser => projUser._id === user._id)
     )
 
     return (
@@ -106,7 +117,7 @@ const CollaboratorPanel = ({ project, isDarkMode }) => {
                             <p className={`mt-2 text-sm ${
                                 isDarkMode ? 'text-gray-400' : 'text-gray-600'
                             }`}>
-                                Add team members to collaborate on "{project.name}"
+                                Add team members to collaborate on "{currentProject.name}"
                             </p>
                         </div>
 
@@ -115,10 +126,10 @@ const CollaboratorPanel = ({ project, isDarkMode }) => {
                             <h3 className={`text-sm font-medium mb-3 ${
                                 isDarkMode ? 'text-gray-300' : 'text-gray-700'
                             }`}>
-                                Current Collaborators ({project.users.length})
+                                Current Collaborators ({currentProject.users.length})
                             </h3>
                             <div className="space-y-2 mb-4">
-                                {project.users.map((user) => (
+                                {currentProject.users.map((user) => (
                                     <div key={user._id} className={`flex items-center gap-3 p-2 rounded-lg ${
                                         isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
                                     }`}>
@@ -216,7 +227,7 @@ const CollaboratorPanel = ({ project, isDarkMode }) => {
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
-                                    Cancel
+                                    Close
                                 </button>
                                 <button
                                     onClick={handleAddCollaborators}
