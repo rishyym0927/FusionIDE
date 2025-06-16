@@ -151,7 +151,7 @@ const Project = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden min-h-0">
                 {/* Sidebar - File Explorer */}
                 <FileExplorer 
                     fileTree={fileTree}
@@ -163,7 +163,7 @@ const Project = () => {
                 />
 
                 {/* Center - Code Editor */}
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     <CodeEditor 
                         fileTree={fileTree}
                         selectedFile={selectedFile}
@@ -174,12 +174,14 @@ const Project = () => {
                     />
                     
                     {/* Logs Panel */}
-                    <LogsPanel 
-                        showLogs={showLogs}
-                        runLogs={runLogs}
-                        setRunLogs={setRunLogs}
-                        isDarkMode={isDarkMode}
-                    />
+                    {showLogs && (
+                        <LogsPanel 
+                            showLogs={showLogs}
+                            runLogs={runLogs}
+                            setRunLogs={setRunLogs}
+                            isDarkMode={isDarkMode}
+                        />
+                    )}
                 </div>
 
                 {/* Right Side - Preview and Chat */}

@@ -127,9 +127,9 @@ const CodeEditor = ({ fileTree, selectedFile, isFileModified, onFileContentChang
     }
 
     return (
-        <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-gray-900' : 'bg-white'} relative`}>
+        <div className={`flex-1 flex flex-col ${isDarkMode ? 'bg-gray-900' : 'bg-white'} relative min-h-0`}>
             {/* Editor Header */}
-            <div className={`px-6 py-4 border-b flex items-center justify-between ${
+            <div className={`px-6 py-4 border-b flex items-center justify-between flex-shrink-0 ${
                 isDarkMode 
                     ? 'bg-gray-800 border-gray-700' 
                     : 'bg-gray-50 border-gray-200'
@@ -181,13 +181,13 @@ const CodeEditor = ({ fileTree, selectedFile, isFileModified, onFileContentChang
             </div>
 
             {/* Editor Content */}
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 min-h-0 relative">
                 {selectedFile && fileTree[selectedFile] ? (
                     <div className="flex h-full">
                         {/* Line Numbers */}
                         <div 
                             ref={lineNumbersRef}
-                            className={`w-16 overflow-hidden select-none ${
+                            className={`w-16 overflow-hidden select-none flex-shrink-0 ${
                                 isDarkMode 
                                     ? 'bg-gray-800 text-gray-500 border-r border-gray-700' 
                                     : 'bg-gray-50 text-gray-400 border-r border-gray-200'
@@ -211,7 +211,7 @@ const CodeEditor = ({ fileTree, selectedFile, isFileModified, onFileContentChang
                             onChange={handleContentChange}
                             onKeyDown={handleKeyDown}
                             onScroll={handleScroll}
-                            className={`flex-1 p-6 resize-none border-0 outline-none ${
+                            className={`flex-1 p-6 resize-none border-0 outline-none custom-scrollbar ${
                                 isDarkMode 
                                     ? 'bg-gray-900 text-gray-300 caret-blue-400' 
                                     : 'bg-white text-gray-800 caret-blue-600'
@@ -220,7 +220,9 @@ const CodeEditor = ({ fileTree, selectedFile, isFileModified, onFileContentChang
                                 fontFamily: 'JetBrains Mono, Fira Code, Monaco, Consolas, monospace',
                                 fontSize: '14px',
                                 lineHeight: '1.5',
-                                tabSize: 4
+                                tabSize: 4,
+                                minHeight: '100%',
+                                maxHeight: 'none'
                             }}
                             placeholder="// Start coding here..."
                             spellCheck={false}
@@ -248,7 +250,7 @@ const CodeEditor = ({ fileTree, selectedFile, isFileModified, onFileContentChang
             
             {/* Status Bar */}
             {selectedFile && (
-                <div className={`px-6 py-2 border-t flex items-center justify-between text-xs ${
+                <div className={`px-6 py-2 border-t flex items-center justify-between text-xs flex-shrink-0 ${
                     isDarkMode 
                         ? 'bg-gray-800 border-gray-700 text-gray-400' 
                         : 'bg-gray-50 border-gray-200 text-gray-600'
