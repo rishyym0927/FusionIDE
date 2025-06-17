@@ -10,13 +10,11 @@ import { generateResult } from './services/ai.service.js';
 
 const port = process.env.PORT || 3000;
 
-
-
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: '*'
-    }
+        origin: process.env.CORS_ORIGIN || '*',
+    },
 });
 
 
@@ -39,7 +37,7 @@ io.use(async (socket, next) => {
             return next(new Error('Authentication error'))
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-key');
 
         if (!decoded) {
             return next(new Error('Authentication error'))
